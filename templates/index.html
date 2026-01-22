@@ -27,7 +27,7 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
         }
 
         h1 {
@@ -44,14 +44,23 @@
             font-size: 0.9rem;
         }
 
-        .search-form {
-            display: flex;
-            gap: 10px;
+        .search-container {
+            position: relative;
             margin-bottom: 30px;
         }
 
-        .search-input {
+        .search-form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input-wrapper {
             flex: 1;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
             padding: 15px 20px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
@@ -63,6 +72,66 @@
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-dropdown.visible {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 8px 15px;
+            font-size: 0.75rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dropdown-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #f5f7fa;
+        }
+
+        .dropdown-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
+        .dropdown-icon {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-city {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .dropdown-country {
+            color: #999;
+            font-size: 0.85rem;
+            margin-left: auto;
         }
 
         .search-btn {
@@ -85,6 +154,104 @@
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+        }
+
+        /* Statistics Section */
+        .stats-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stats-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .stats-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-refresh {
+            font-size: 0.75rem;
+            color: #667eea;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .stats-refresh:hover {
+            color: #764ba2;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-value.good { color: #388e3c; }
+        .stat-value.warning { color: #f57c00; }
+        .stat-value.error { color: #d32f2f; }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .health-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .health-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .health-dot.healthy { background: #4caf50; }
+        .health-dot.degraded { background: #ff9800; }
+        .health-dot.unhealthy { background: #f44336; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .health-text {
+            font-size: 0.8rem;
+            color: #666;
         }
 
         .weather-card {
@@ -128,6 +295,12 @@
             margin: 20px 0;
         }
 
+        .weather-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
         .weather-details {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -158,9 +331,13 @@
         .cache-badge {
             text-align: center;
             margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .cache-badge span {
+        .badge {
             display: inline-block;
             padding: 5px 12px;
             border-radius: 20px;
@@ -177,6 +354,11 @@
         .fresh {
             background: #e8f5e9;
             color: #388e3c;
+        }
+
+        .response-time {
+            background: #f3e5f5;
+            color: #7b1fa2;
         }
 
         .error-message {
@@ -223,6 +405,27 @@
             font-size: 0.75rem;
             margin-top: 5px;
         }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .footer-text {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        .footer-link {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -230,17 +433,57 @@
         <h1>Weather Proxy</h1>
         <p class="subtitle">Enter a city name to get current weather</p>
 
-        <form class="search-form" id="weatherForm">
-            <input
-                type="text"
-                class="search-input"
-                id="cityInput"
-                placeholder="Enter city name..."
-                autocomplete="off"
-                required
-            >
-            <button type="submit" class="search-btn" id="searchBtn">Search</button>
-        </form>
+        <!-- Statistics Section -->
+        <div class="stats-section" id="statsSection">
+            <div class="stats-header">
+                <span class="stats-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 20V10M12 20V4M6 20v-6"/>
+                    </svg>
+                    Session Statistics
+                </span>
+                <span class="stats-refresh" onclick="resetStats()">Reset</span>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="statSearches">0</div>
+                    <div class="stat-label">Searches</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value good" id="statCacheHits">0</div>
+                    <div class="stat-label">Cache Hits</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statAvgTime">0ms</div>
+                    <div class="stat-label">Avg Time</div>
+                </div>
+            </div>
+            <div class="health-indicator">
+                <span class="health-dot healthy" id="healthDot"></span>
+                <span class="health-text" id="healthText">Service Healthy</span>
+            </div>
+        </div>
+
+        <!-- Search Form -->
+        <div class="search-container">
+            <form class="search-form" id="weatherForm">
+                <div class="search-input-wrapper">
+                    <input
+                        type="text"
+                        class="search-input"
+                        id="cityInput"
+                        placeholder="Enter city name..."
+                        autocomplete="off"
+                        required
+                    >
+                    <div class="search-dropdown" id="searchDropdown">
+                        <div class="dropdown-header">Recent Searches</div>
+                        <div id="dropdownItems"></div>
+                    </div>
+                </div>
+                <button type="submit" class="search-btn" id="searchBtn">Search</button>
+            </form>
+        </div>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
@@ -251,6 +494,7 @@
 
         <div class="weather-card" id="weatherCard">
             <div class="weather-header">
+                <div class="weather-icon" id="weatherIcon"></div>
                 <div class="city-name" id="cityName"></div>
                 <div class="country" id="country"></div>
                 <div class="coordinates" id="coordinates"></div>
@@ -270,19 +514,186 @@
             </div>
 
             <div class="cache-badge">
-                <span id="cacheBadge"></span>
+                <span class="badge" id="cacheBadge"></span>
+                <span class="badge response-time" id="responseTime"></span>
             </div>
+        </div>
+
+        <div class="footer">
+            <p class="footer-text">
+                Powered by <a href="https://open-meteo.com/" target="_blank" class="footer-link">Open-Meteo</a> |
+                <a href="/health" target="_blank" class="footer-link">Health</a> |
+                <a href="/metrics" target="_blank" class="footer-link">Metrics</a>
+            </p>
         </div>
     </div>
 
     <script>
+        // DOM Elements
         const form = document.getElementById('weatherForm');
         const cityInput = document.getElementById('cityInput');
         const searchBtn = document.getElementById('searchBtn');
         const loading = document.getElementById('loading');
         const errorMessage = document.getElementById('errorMessage');
         const weatherCard = document.getElementById('weatherCard');
+        const searchDropdown = document.getElementById('searchDropdown');
+        const dropdownItems = document.getElementById('dropdownItems');
 
+        // Statistics
+        let stats = {
+            searches: 0,
+            cacheHits: 0,
+            totalTime: 0
+        };
+
+        // Search history (stored in localStorage)
+        const HISTORY_KEY = 'weatherSearchHistory';
+        const MAX_HISTORY = 3;
+
+        function getSearchHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveSearchHistory(city, country) {
+            let history = getSearchHistory();
+
+            // Remove duplicate if exists
+            history = history.filter(h => h.city.toLowerCase() !== city.toLowerCase());
+
+            // Add to beginning
+            history.unshift({ city, country, timestamp: Date.now() });
+
+            // Keep only MAX_HISTORY items
+            history = history.slice(0, MAX_HISTORY);
+
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            updateDropdown();
+        }
+
+        function updateDropdown() {
+            const history = getSearchHistory();
+            dropdownItems.innerHTML = '';
+
+            if (history.length === 0) {
+                dropdownItems.innerHTML = '<div class="dropdown-item" style="color: #999; cursor: default;">No recent searches</div>';
+                return;
+            }
+
+            history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                div.innerHTML = `
+                    <span class="dropdown-icon">&#128269;</span>
+                    <span class="dropdown-city">${item.city}</span>
+                    <span class="dropdown-country">${item.country}</span>
+                `;
+                div.addEventListener('click', () => {
+                    cityInput.value = item.city;
+                    searchDropdown.classList.remove('visible');
+                    form.dispatchEvent(new Event('submit'));
+                });
+                dropdownItems.appendChild(div);
+            });
+        }
+
+        // Show dropdown on focus
+        cityInput.addEventListener('focus', () => {
+            if (getSearchHistory().length > 0 || cityInput.value === '') {
+                updateDropdown();
+                searchDropdown.classList.add('visible');
+            }
+        });
+
+        // Hide dropdown on blur (with delay for click)
+        cityInput.addEventListener('blur', () => {
+            setTimeout(() => searchDropdown.classList.remove('visible'), 200);
+        });
+
+        // Hide dropdown when typing
+        cityInput.addEventListener('input', () => {
+            if (cityInput.value.length > 0) {
+                searchDropdown.classList.remove('visible');
+            } else {
+                updateDropdown();
+                searchDropdown.classList.add('visible');
+            }
+        });
+
+        // Weather code to emoji mapping
+        function getWeatherIcon(code) {
+            const icons = {
+                0: '☀️',      // Clear sky
+                1: '🌤️',     // Mainly clear
+                2: '⛅',      // Partly cloudy
+                3: '☁️',      // Overcast
+                45: '🌫️',    // Fog
+                48: '🌫️',    // Depositing rime fog
+                51: '🌧️',    // Light drizzle
+                53: '🌧️',    // Moderate drizzle
+                55: '🌧️',    // Dense drizzle
+                61: '🌧️',    // Slight rain
+                63: '🌧️',    // Moderate rain
+                65: '🌧️',    // Heavy rain
+                71: '🌨️',    // Slight snow
+                73: '🌨️',    // Moderate snow
+                75: '❄️',     // Heavy snow
+                77: '🌨️',    // Snow grains
+                80: '🌦️',    // Slight rain showers
+                81: '🌦️',    // Moderate rain showers
+                82: '⛈️',     // Violent rain showers
+                85: '🌨️',    // Slight snow showers
+                86: '🌨️',    // Heavy snow showers
+                95: '⛈️',     // Thunderstorm
+                96: '⛈️',     // Thunderstorm with slight hail
+                99: '⛈️',     // Thunderstorm with heavy hail
+            };
+            return icons[code] || '🌡️';
+        }
+
+        // Update statistics display
+        function updateStats() {
+            document.getElementById('statSearches').textContent = stats.searches;
+            document.getElementById('statCacheHits').textContent = stats.cacheHits;
+
+            const avgTime = stats.searches > 0 ? Math.round(stats.totalTime / stats.searches) : 0;
+            document.getElementById('statAvgTime').textContent = avgTime + 'ms';
+        }
+
+        function resetStats() {
+            stats = { searches: 0, cacheHits: 0, totalTime: 0 };
+            updateStats();
+        }
+
+        // Check health status
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+
+                const healthDot = document.getElementById('healthDot');
+                const healthText = document.getElementById('healthText');
+
+                if (data.status === 'healthy') {
+                    healthDot.className = 'health-dot healthy';
+                    healthText.textContent = 'Service Healthy';
+                } else if (data.status === 'degraded') {
+                    healthDot.className = 'health-dot degraded';
+                    healthText.textContent = 'Service Degraded';
+                } else {
+                    healthDot.className = 'health-dot unhealthy';
+                    healthText.textContent = 'Service Unhealthy';
+                }
+            } catch {
+                document.getElementById('healthDot').className = 'health-dot unhealthy';
+                document.getElementById('healthText').textContent = 'Service Unavailable';
+            }
+        }
+
+        // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const city = cityInput.value.trim();
@@ -291,20 +702,35 @@
             // Hide previous results
             weatherCard.classList.remove('visible');
             errorMessage.classList.remove('visible');
+            searchDropdown.classList.remove('visible');
 
             // Show loading
             loading.classList.add('visible');
             searchBtn.disabled = true;
 
+            const startTime = performance.now();
+
             try {
                 const response = await fetch(`/weather?city=${encodeURIComponent(city)}`);
                 const data = await response.json();
+                const endTime = performance.now();
+                const responseTime = Math.round(endTime - startTime);
 
                 if (!response.ok) {
                     throw new Error(data.error || data.detail || 'Failed to fetch weather');
                 }
 
+                // Update statistics
+                stats.searches++;
+                stats.totalTime += responseTime;
+                if (data.cached) stats.cacheHits++;
+                updateStats();
+
+                // Save to history
+                saveSearchHistory(data.city, data.country);
+
                 // Update weather card
+                document.getElementById('weatherIcon').textContent = getWeatherIcon(data.weather_code);
                 document.getElementById('cityName').textContent = data.city;
                 document.getElementById('country').textContent = data.country;
                 document.getElementById('coordinates').textContent =
@@ -319,15 +745,21 @@
                 const cacheBadge = document.getElementById('cacheBadge');
                 if (data.cached) {
                     cacheBadge.textContent = 'Cached';
-                    cacheBadge.className = 'cached';
+                    cacheBadge.className = 'badge cached';
                 } else {
                     cacheBadge.textContent = 'Fresh Data';
-                    cacheBadge.className = 'fresh';
+                    cacheBadge.className = 'badge fresh';
                 }
+
+                document.getElementById('responseTime').textContent = responseTime + 'ms';
 
                 weatherCard.classList.add('visible');
 
             } catch (err) {
+                stats.searches++;
+                stats.totalTime += Math.round(performance.now() - startTime);
+                updateStats();
+
                 errorMessage.textContent = err.message;
                 errorMessage.classList.add('visible');
             } finally {
@@ -336,8 +768,13 @@
             }
         });
 
-        // Focus input on load
+        // Initialize
+        updateDropdown();
+        checkHealth();
         cityInput.focus();
+
+        // Periodic health check
+        setInterval(checkHealth, 30000);
     </script>
 </body>
 </html>
