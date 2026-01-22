@@ -63,7 +63,8 @@ class RedisCache:
             data = self.client.get(key)
             if data:
                 logger.info("cache_hit", key=key)
-                return json.loads(data)
+                result: dict[str, Any] = json.loads(data)
+                return result
             logger.info("cache_miss", key=key)
             return None
         except redis.RedisError as e:

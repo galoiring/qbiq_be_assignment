@@ -188,7 +188,12 @@ class WeatherService:
             ExternalAPIError: If API fails.
         """
         url = f"{config.GEOCODING_API_BASE_URL}/search"
-        params = {"name": city, "count": 1, "language": "en", "format": "json"}
+        params: dict[str, str | int] = {
+            "name": city,
+            "count": 1,
+            "language": "en",
+            "format": "json",
+        }
 
         logger.info("geocoding_request", city=city, url=url)
 
@@ -245,7 +250,7 @@ class WeatherService:
             ExternalAPIError: If API fails.
         """
         url = f"{config.WEATHER_API_BASE_URL}/forecast"
-        params = {
+        params: dict[str, str | float] = {
             "latitude": latitude,
             "longitude": longitude,
             "current": (
@@ -278,7 +283,8 @@ class WeatherService:
                 status_code=response.status_code,
             )
 
-        return response.json()
+        result: dict[str, Any] = response.json()
+        return result
 
 
 # Global service instance

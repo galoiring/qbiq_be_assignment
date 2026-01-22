@@ -7,6 +7,7 @@ from contextvars import ContextVar
 from typing import Any
 
 import structlog
+from structlog.typing import Processor
 
 # Context variable for request correlation
 request_id_ctx: ContextVar[str] = ContextVar("request_id", default="")
@@ -48,6 +49,8 @@ def configure_logging(json_logs: bool = True) -> None:
         structlog.processors.UnicodeDecoder(),
     ]
 
+    # Select renderer based on environment
+    renderer: Processor
     if json_logs:
         # JSON format for production
         renderer = structlog.processors.JSONRenderer()
@@ -87,4 +90,5 @@ def configure_logging(json_logs: bool = True) -> None:
 
 def get_logger(name: str) -> structlog.stdlib.BoundLogger:
     """Get a structured logger instance."""
-    return structlog.get_logger(name)
+    logger: structlog.stdlib.BoundLogger = structlog.get_logger(name)
+    return logger
