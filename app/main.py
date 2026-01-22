@@ -265,6 +265,14 @@ def is_shutting_down() -> bool:
 app = create_app()
 
 if __name__ == "__main__":
-    # Development server
+    # Development server - only for local development
+    # In production, use gunicorn: gunicorn app.main:app
+    import os
+
     dev_app = create_app(json_logs=False)
-    dev_app.run(host="0.0.0.0", port=8000, debug=True)
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    dev_app.run(
+        host="127.0.0.1",  # Bind to localhost only for security
+        port=int(os.getenv("PORT", "8000")),
+        debug=debug_mode,  # nosec B201 - controlled by environment variable
+    )
