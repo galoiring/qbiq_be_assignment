@@ -14,6 +14,7 @@ from app.circuit_breaker import (
     get_breaker_status,
     weather_api_breaker,
 )
+from app.history import Transaction, TransactionHistory, transaction_history
 from app.logging_config import configure_logging, get_logger, set_request_id
 from app.metrics import (
     http_request_duration_seconds,
@@ -35,12 +36,14 @@ shutdown_flag = False
 
 def create_app(
     weather_svc: WeatherService | None = None,
+    history_store: TransactionHistory | None = None,
     json_logs: bool = True,
 ) -> Flask:
     """Create and configure the Flask application.
 
     Args:
         weather_svc: Optional weather service for dependency injection.
+        history_store: Optional transaction history for dependency injection.
         json_logs: Whether to use JSON format for logs.
 
     Returns:
@@ -56,8 +59,9 @@ def create_app(
     )
     app.config["JSON_SORT_KEYS"] = False
 
-    # Use injected service or global instance
+    # Use injected services or global instances
     svc = weather_svc or weather_service
+    history = history_store or transaction_history
 
     # Register signal handlers for graceful shutdown
     _register_signal_handlers()
@@ -121,12 +125,14 @@ def create_app(
             JSON response with weather data or error.
         """
         city = request.args.get("city", "").strip()
+        start_time = time.time()
 
         if not city:
             return jsonify({"error": "City parameter is required"}), 400
 
         try:
             data = svc.get_weather(city)
+            response_time_ms = round((time.time() - start_time) * 1000, 2)
 
             # Record metric
             weather_requests_total.labels(
@@ -135,24 +141,62 @@ def create_app(
                 status="success",
             ).inc()
 
+            # Record transaction history
+            history.add_transaction(
+                Transaction(
+                    timestamp=time.time(),
+                    city=data.get("city", city),
+                    success=True,
+                    cached=data.get("cached", False),
+                    response_time_ms=response_time_ms,
+                    status_code=200,
+                    temperature=data.get("temperature"),
+                    country=data.get("country"),
+                )
+            )
+
             return jsonify(data), 200
 
         except CityNotFoundError as e:
+            response_time_ms = round((time.time() - start_time) * 1000, 2)
             logger.warning("city_not_found", city=city, error=str(e))
             weather_requests_total.labels(
                 city=city.lower(),
                 cached="false",
                 status="not_found",
             ).inc()
+            history.add_transaction(
+                Transaction(
+                    timestamp=time.time(),
+                    city=city,
+                    success=False,
+                    cached=False,
+                    response_time_ms=response_time_ms,
+                    status_code=404,
+                    error="City not found",
+                )
+            )
             return jsonify({"error": f"City '{city}' not found"}), 404
 
         except CircuitBreakerOpenError as e:
+            response_time_ms = round((time.time() - start_time) * 1000, 2)
             logger.error("circuit_breaker_open", city=city, breaker=e.breaker_name)
             weather_requests_total.labels(
                 city=city.lower(),
                 cached="false",
                 status="circuit_open",
             ).inc()
+            history.add_transaction(
+                Transaction(
+                    timestamp=time.time(),
+                    city=city,
+                    success=False,
+                    cached=False,
+                    response_time_ms=response_time_ms,
+                    status_code=503,
+                    error="Circuit breaker open",
+                )
+            )
             return (
                 jsonify(
                     {
@@ -165,6 +209,7 @@ def create_app(
             )
 
         except ExternalAPIError as e:
+            response_time_ms = round((time.time() - start_time) * 1000, 2)
             logger.error(
                 "external_api_error",
                 city=city,
@@ -176,6 +221,17 @@ def create_app(
                 cached="false",
                 status="upstream_error",
             ).inc()
+            history.add_transaction(
+                Transaction(
+                    timestamp=time.time(),
+                    city=city,
+                    success=False,
+                    cached=False,
+                    response_time_ms=response_time_ms,
+                    status_code=502,
+                    error=str(e),
+                )
+            )
             return (
                 jsonify(
                     {
@@ -187,12 +243,24 @@ def create_app(
             )
 
         except Exception as e:
+            response_time_ms = round((time.time() - start_time) * 1000, 2)
             logger.exception("unexpected_error", city=city, error=str(e))
             weather_requests_total.labels(
                 city=city.lower(),
                 cached="false",
                 status="error",
             ).inc()
+            history.add_transaction(
+                Transaction(
+                    timestamp=time.time(),
+                    city=city,
+                    success=False,
+                    cached=False,
+                    response_time_ms=response_time_ms,
+                    status_code=500,
+                    error="Internal server error",
+                )
+            )
             return jsonify({"error": "Internal server error"}), 500
 
     @app.route("/health")
@@ -224,6 +292,60 @@ def create_app(
             Prometheus metrics in text format.
         """
         return Response(generate_latest(), mimetype="text/plain")
+
+    @app.route("/history")
+    def history_page() -> str:
+        """Serve the history/analytics page."""
+        return render_template("history.html")
+
+    @app.route("/api/history")
+    def get_history() -> tuple[Response, int]:
+        """Get transaction history.
+
+        Query Parameters:
+            limit: Maximum number of transactions (default 50).
+
+        Returns:
+            JSON response with transaction history.
+        """
+        limit = request.args.get("limit", "50")
+        try:
+            limit_int = min(int(limit), 100)  # Cap at 100
+        except ValueError:
+            limit_int = 50
+
+        transactions = history.get_history(limit_int)
+        return (
+            jsonify(
+                {
+                    "transactions": [t.to_dict() for t in transactions],
+                    "count": len(transactions),
+                }
+            ),
+            200,
+        )
+
+    @app.route("/api/statistics")
+    def get_statistics() -> tuple[Response, int]:
+        """Get aggregated statistics.
+
+        Returns:
+            JSON response with statistics.
+        """
+        stats = history.get_statistics()
+        return jsonify(stats), 200
+
+    @app.route("/api/history", methods=["DELETE"])
+    def clear_history() -> tuple[Response, int]:
+        """Clear transaction history.
+
+        Returns:
+            JSON response confirming deletion.
+        """
+        success = history.clear_history()
+        if success:
+            return jsonify({"message": "History cleared"}), 200
+        return jsonify({"error": "Failed to clear history"}), 500
 
     @app.errorhandler(404)
     def not_found(error: Any) -> tuple[Response, int]:
