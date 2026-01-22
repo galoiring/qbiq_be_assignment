@@ -152,13 +152,6 @@
         }
 
         /* Charts Section */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
         .chart-card {
             background: white;
             border-radius: 12px;
@@ -279,10 +272,6 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-
             .history-table {
                 font-size: 0.8rem;
             }
@@ -397,24 +386,13 @@
         </div>
 
         <!-- Charts -->
-        <div class="charts-grid">
-            <div class="chart-card">
-                <div class="chart-title">
-                    <span>&#128200;</span>
-                    Response Time Comparison (ms)
-                </div>
-                <div class="chart-container">
-                    <canvas id="responseTimeChart"></canvas>
-                </div>
+        <div class="chart-card" style="margin-bottom: 20px;">
+            <div class="chart-title">
+                <span>&#128200;</span>
+                Response Time Comparison (ms)
             </div>
-            <div class="chart-card">
-                <div class="chart-title">
-                    <span>&#128202;</span>
-                    Cache vs Fresh Requests
-                </div>
-                <div class="chart-container">
-                    <canvas id="cacheChart"></canvas>
-                </div>
+            <div class="chart-container">
+                <canvas id="responseTimeChart"></canvas>
             </div>
         </div>
 
@@ -452,7 +430,6 @@
 
     <script>
         let responseTimeChart = null;
-        let cacheChart = null;
 
         // Format timestamp
         function formatTime(timestamp) {
@@ -614,49 +591,6 @@
             });
         }
 
-        // Create/update cache distribution chart
-        function updateCacheChart(stats) {
-            const ctx = document.getElementById('cacheChart').getContext('2d');
-
-            if (cacheChart) {
-                cacheChart.destroy();
-            }
-
-            cacheChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Cache Hits', 'Cache Misses', 'Errors'],
-                    datasets: [{
-                        data: [
-                            stats.cache_hits || 0,
-                            stats.cache_misses || 0,
-                            stats.failed_requests || 0
-                        ],
-                        backgroundColor: [
-                            'rgba(33, 150, 243, 0.8)',
-                            'rgba(255, 152, 0, 0.8)',
-                            'rgba(244, 67, 54, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(33, 150, 243, 1)',
-                            'rgba(255, 152, 0, 1)',
-                            'rgba(244, 67, 54, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                        }
-                    }
-                }
-            });
-        }
-
         // Refresh all data
         async function refreshData() {
             document.getElementById('loading').classList.add('visible');
@@ -667,9 +601,6 @@
                     loadHistory()
                 ]);
 
-                if (stats) {
-                    updateCacheChart(stats);
-                }
                 if (transactions && transactions.length > 0) {
                     updateResponseTimeChart(transactions);
                 }
